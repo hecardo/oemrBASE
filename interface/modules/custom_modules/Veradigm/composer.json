@@ -1,0 +1,27 @@
+{
+	"name": "chn/Veradigm",
+	"description": "Provides the ability to interface with the Veradigm/AllScript E-Prescribing API",
+	"type": "openemr-module",
+	"authors": [
+		{
+			"email": "Devyn@WilliamsMedTech.net",
+			"name": "Devyn Collier Johnson",
+			"role": "Developer"
+		}
+	],
+	"keywords": ["openemr", "openemr-module"],
+	"minimum-stability": "stable",
+	"autoload": {
+		"psr-4": {"OpenEMR\\Modules\\Veradigm\\": "interface/modules/custom_modules/Veradigm/src"}
+	},
+	"require": {
+		"nyholm/psr7": "^1.4",
+		"openemr/oe-module-installer-plugin": "^0.1.0",
+		"php": "^7.1",
+		"symfony/event-dispatcher": "^4.4.0",
+		"robrichards/xmlseclibs": "^3.1"
+	},
+	"conflict": {
+		"openemr/openemr": "<6.0.0"
+	}
+}
