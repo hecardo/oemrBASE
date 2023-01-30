@@ -76,7 +76,7 @@ class LabOrderItem {
 		}
 		
 		// run the child insert
-		$this->id = sqlInsert("INSERT INTO `procedure_order_code` SET $sql", $binds);
+		$this->id = sqlInsert("REPLACE INTO `procedure_order_code` SET $sql", $binds);
 				
 		return $this->id;
 	}

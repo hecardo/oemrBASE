@@ -279,7 +279,7 @@ EOD;
 				<table class='w-100'>
 					<tr>
 						<td class='text-nowrap font-weight-bold' style='min-width:150px'>Acession Number: </td><td style='min-width:120px'><?php echo $order_data->control_id ?></td>
-						<td class='text-nowrap font-weight-bold' style='min-width:90px'>Date/Time: </td><td style='min-width:180px'><?php echo FormatDateTime($order_data->received_datetime, 'Y-m-d g:ia') ?></td>
+						<td class='text-nowrap font-weight-bold' style='min-width:90px'>Date/Time: </td><td style='min-width:180px'><?php echo Tools::FormatDateTime($order_data->received_datetime, 'Y-m-d g:ia') ?></td>
 						<td class='text-nowrap font-weight-bold' style='min-width:135px'>Report Status: </td><td class='text-nowrap w-100'><?php echo $status_list->getItem($order_data->status) ?></td>
 					</tr>
 				</table>
@@ -301,7 +301,7 @@ EOD;
 <?php 
 				$last_code = $order_item->procedure_code;
 				$result_list = LabResultItem::fetchItemList($report_data->procedure_report_id);
-				if (!result_list) continue; // no details yet
+				if (!$result_list) continue; // no details yet
 	
 				// process each observation
 				$first = true;
@@ -504,10 +504,10 @@ EOD;
 		</table>
 	</fieldset>
 <?php 
-		if (GetSeconds($order_data->reviewed_datetime)) {
+		if (Tools::GetSeconds($order_data->reviewed_datetime)) {
 			$header = "<tr><td style='min-width:150px'></td><td style='min-width:395px'></td><td style='min-width:140px'></td><td class='w-100'></td></tr>\n";
 			$content = Reports::do_columns(User::getUserName($order_data->reviewed_id),'Reviewing Provider',User::getUserName($order_data->notified_id),'Notification By');
-			$content .= Reports::do_columns(FormatDate($order_data->reviewed_datetime),'Reviewed Date',FormatDate($order_data->notified_datetime),'Notified Date');
+			$content .= Reports::do_columns(Tools::FormatDate($order_data->reviewed_datetime),'Reviewed Date',Tools::FormatDate($order_data->notified_datetime),'Notified Date');
 			$content .= Reports::do_columns(false,false,$order_data->notified_person, 'Person Notified');
 	
 			if ($order_data->review_notes) {

@@ -1,73 +1,58 @@
 <?php 
-/** **************************************************************************
- *	LABORATORY/ResultReport.PHP
- *
- *	Copyright (c)2014 - Medical Technology Services (MDTechSvcs.com)
- *
- *	This program is licensed software: licensee is granted a limited nonexclusive
- *  license to install this Software on more than one computer system, as long as all
- *  systems are used to support a single licensee. Licensor is and remains the owner
- *  of all titles, rights, and interests in program.
- *
- *  Licensee will not make copies of this Software or allow copies of this Software 
- *  to be made by others, unless authorized by the licensor. Licensee may make copies 
- *  of the Software for backup purposes only.
- *
- *	This program is distributed in the hope that it will be useful, but WITHOUT 
- *	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- *  FOR A PARTICULAR PURPOSE. LICENSOR IS NOT LIABLE TO LICENSEE FOR ANY DAMAGES, 
- *  INCLUDING COMPENSATORY, SPECIAL, INCIDENTAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL 
- *  DAMAGES, CONNECTED WITH OR RESULTING FROM THIS LICENSE AGREEMENT OR LICENSEE'S 
- *  USE OF THIS SOFTWARE.
- *
- *  @package laboratory
- *  @subpackage generic
- *  @version 2.0
- *  @copyright Medical Technology Services
- *  @author Ron Criswell <info@keyfocusmedia.com>
- * 
- *************************************************************************** */
-//require_once("{$GLOBALS['fileroot']}/vendor/tecnickcom/tcpdf/tcpdf.php");
-//require_once("{$GLOBALS['fileroot']}/vendor/tecnickcom/tcpdf/fpdi/fpdi.php");
-require_once("{$GLOBALS['fileroot']}/library/tcpdf/tcpdf.php");
-require_once("{$GLOBALS['fileroot']}/library/tcpdf/fpdi/fpdi.php");
+/**
+ * @package   	WMT
+ * @subpackage	Laboratory
+ * @author    	Ron Criswell <ron.criswell@medtechsvcs.com>
+ * @copyright 	Copyright (c)2023 Medical Technilogy Services <https://medtechsvcs.com/>
+ * @license   	https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
+ */
 
-$client_address = '';
+namespace WMT\Laboratory\Generic;
 
-if (!class_exists("ReportConcat")) {
+use Mpdf\Mpdf;
+use \Document;
+
+use WMT\Laboratory\Common\OrderItem;
+use WMT\Laboratory\Common\Result;
+use WMT\Laboratory\Common\ResultItem;
+
+use WMT\Objects\Patient;
+use WMT\Objects\Insurance;
+use WMT\Classes\Options;
+
+/*if (!class_exists("ReportConcat")) {
 	class ReportConcat extends FPDI {
 		public function Footer() {}
 		public function Header() {}
 	}
-}
+}*/
 
-if (!class_exists("ResultReport")) {
+/**
+ * The class LabCorpResult is used to generate the lab documents for
+ * the LabCorp interface. It utilizes the TCPDF library routines to 
+ * generate the PDF documents.
+ */
+class ResultReport
+{
 	/**
-	 * The class LabCorpResult is used to generate the lab documents for
-	 * the LabCorp interface. It utilizes the TCPDF library routines to 
-	 * generate the PDF documents.
-	 *
+	 * Overrides the default header method to produce a custom document header.
+	 * @return null
+	 * 
 	 */
-	class ResultReport extends TCPDF {
-		/**
-		 * Overrides the default header method to produce a custom document header.
-		 * @return null
-		 * 
-		 */
-		public function Header() {
-			global $message, $client_address, $lab_data;
-			
-			$docroot = $_SERVER['DOCUMENT_ROOT'];
-			if ($docroot == '/') $docroot = $GLOBALS['wmt_docroot'];
-			$this->Image($docroot.'/images/new_logo.png', 15, 10, 120);
-			
-			ob_start();
+	public function HeaderFirst() {
+		global $message, $client_address, $lab_data;
+		
+//		$docroot = $_SERVER['DOCUMENT_ROOT'];
+//		if ($docroot == '/') $docroot = $GLOBALS['wmt_docroot'];
+//		$this->Image($docroot.'/images/new_logo.png', 15, 10, 120);
+		
+		ob_start();
 ?>
 <table style="width:100%">
 	<tr><td><br/><br/></td></tr>
 	<tr>
 		<td style="text-align:center;font-size:20px;font-weight:bold">
-			<?php echo $lab_data['name'] ?>
+			<?php echo $lab_data->name ?>
 		</td>
 	</tr>
 	<tr>
@@ -76,30 +61,54 @@ if (!class_exists("ResultReport")) {
 		</td>
 	</tr>
 </table>
-<?php 
-			$output = ob_get_clean(); 
-			$this->writeHTMLCell(0,0,'','',$output,0,1);
-			$this->ln(15);
 
-			ob_start();
-?>
+<table nobr="true" style="width:100%">
+	<tr>
+		<td style="width:50%"><span style="font-size:1.3em;font-weight:bold">eResults</span></td>
+		<td style="width:55%;text-align:right"><span style="font-size:1.3em;font-weight:bold"></span>Page {nb} {nbpg}</td>
+	</tr>
+</table>
+<?php
+			$output = ob_get_clean(); 
+			return $output;
+
+	} // end header
+
+	/**
+	 * Overrides the default header method to produce a custom document header.
+	 * @return null
+	 *
+	 */
+	public function HeaderSecond() {
+		global $message, $client_address, $lab_data;
+		
+		//		$docroot = $_SERVER['DOCUMENT_ROOT'];
+		//		if ($docroot == '/') $docroot = $GLOBALS['wmt_docroot'];
+		//		$this->Image($docroot.'/images/new_logo.png', 15, 10, 120);
+		
+		ob_start();
+		?>
+<table style="width:100%">
+	<tr><td><br/><br/></td></tr>
+	<tr>
+		<td style="text-align:center;font-size:20px;font-weight:bold">
+			<?php echo $lab_data->name ?>
+		</td>
+	</tr>
+	<tr>
+		<td style="text-align:center;font-weight:bold">
+			Williams Medical Technologies, Inc.
+		</td>
+	</tr>
+</table>
+
 <table nobr="true" style="width:100%">
 	<tr>
 		<td style="width:50%"><span style="font-size:1.3em;font-weight:bold">&nbsp;&nbsp;&nbsp;&nbsp;eResults</span></td>
-		<td style="width:55%;text-align:right"><span style="font-size:1.3em;font-weight:bold">&nbsp;</span>Page <?php echo $this->getAliasNumPage() ?> of <?php echo $this->getAliasNbPages() ?></td>
+		<td style="width:55%;text-align:right"><span style="font-size:1.3em;font-weight:bold">&nbsp;</span>Page {nb} {nbpg}</td>
 	</tr>
 </table>
-<?php 
-			$output = ob_get_clean(); 
-			$this->writeHTMLCell(0,0,'','',$output,0,1);
 
-			$pageNo = $this->PageNo();
-			if ($pageNo > 1) { // starting on second page
-				// reset header height for page 2+
-				$this->SetMargins(PDF_MARGIN_LEFT, 150, PDF_MARGIN_RIGHT);
-					
-				ob_start();
-?>
 <table nobr="true" style="width:100%;border:1px solid black;padding:0 5px">
 	<tr>
 		<td style="width:60%;border:1px solid black">
@@ -110,15 +119,16 @@ if (!class_exists("ResultReport")) {
 			<small>Account Number</small><br/><b><?php echo $message->account_id ?></b>
 		</td>
 		<td style="width:20%;border:1px solid black">
-			<small>Accession Number</small><br/><b><?php echo $message->lab_number; ?></b>
+			<small>Accession Number</small><br/><b><?php echo $message->control_id; ?></b>
 		</td>
 	</tr>
 </table>
-<table nobr="true" style="width:100%;border:1px solid black;padding:0 5px">
+
+<table nobr="true" style="width:100%;border:1px solid black;padding:0 5px;border-top:none;">
 	<tr>
 		<td style="width:15%;border:1px solid black">
 			<small>Patient ID</small><br/>
-			<b><?php echo $message->pubpid ?></b>
+			<b><?php echo ($pid) ? $pat_data->pid : ''; ?></b>
 		</td>
 		<td style="width:15%;border:1px solid black">
 			<small>Date of Birth</small><br/>
@@ -137,7 +147,7 @@ if (!class_exists("ResultReport")) {
 			<b><?php echo $message->order_number ?></b>
 		</td>
 		<td style="width:20%;border:1px solid black">
-			<?php $label = ($lab_data['type'] == 'radiology')? "Date/Time Ordered" : "Date/Time Collected"; ?>
+			<?php $label = ($lab_data->type == 'radiology')? "Date/Time Ordered" : "Date/Time Collected"; ?>
 			<small><?php echo $label ?></small><br/>
 			<b><?php echo ($message->specimen_datetime) ? date('Y-m-d h:i A', strtotime($message->specimen_datetime)) : '' ?></b>
 		</td>
@@ -147,17 +157,11 @@ if (!class_exists("ResultReport")) {
 		</td>
 	</tr>
 </table>
-<?php 
-				$output = ob_get_clean(); 
-				$this->writeHTMLCell(0,0,'','',$output,0,1);
-				$this->ln(5);
-				
-				ob_start();
-?>
+
 <table style="width:100%">
 	<tr style="font-size:8px;font-weight:bold;">
 		<td style="width:15px">&nbsp;</td>
-<?php if ($lab_data['type'] == 'radiology') { ?>
+<?php if ($lab_data->type == 'radiology') { ?>
 		<td style="width:65%">
 			RESULT DESCRIPTION
 		</td>
@@ -200,135 +204,110 @@ if (!class_exists("ResultReport")) {
 	</tr>
 </table>
 <?php
-				$output = ob_get_clean(); 
-				$this->writeHTMLCell(0,0,'','',$output,0,1);
-				$this->ln(5);
-				
-			} // end page 2+ header
-			
-		} // end header
+		$output = ob_get_clean(); 
+		return $output;
 
+	} // end header
+
+	
+	/**
+	 * Overrides the default footer method to produce a custom document footer.
+	 * @return null
+	 * 
+	 */
+	public function Footer() {
+		global $message;
 		
-		/**
-		 * Overrides the default footer method to produce a custom document footer.
-		 * @return null
-		 * 
-		 */
-		public function Footer() {
-			global $message;
-			
-			ob_start();
+		ob_start();
 ?>
-			<table nobr="true" style="width:100%;border:1px solid black;padding:0 5px">
-				<tr>
-					<td style="border:1px solid black">
-						<small>Accession Number</small><br/><b><?php echo $message->lab_number ?></b>
-					</td>
-					<td style="border:1px solid black">
-						<small>Patient ID</small><br/>
-						<b><?php echo ($message->pubpid) ? $message->pubpid : $message->pid ?></b>
-					</td>
-					<td style="border:1px solid black">
-						<small>Order Number</small><br/>
-						<b><?php echo $message->order_number ?></b>
-					</td>
-					<td style="border:1px solid black">
-						<small>Account Number</small><br/>
-						<b><?php echo $message->account_id ?></b>
-					</td>
-					<td style="border:1px solid black">
-						<small>Report Status</small><br/>
-						<b><?php echo $message->report_status ?></b>
-					</td>
-				</tr>
-			</table>
-<?php 
-			$output = ob_get_clean(); 
-			$this->writeHTMLCell(0,0,'','',$output,0,1);
-					
-			ob_start();
-?>
-			<table nobr="true" style="width:100%;padding:10px 0;font-size:1.2em">
-				<tr>
-					<td style="width:5%">&nbsp;</td>
-					<td style="text-align:left;width:45%">
-						<?php echo date('m/d/Y h:i A') ?>
-					</td>
-					<td style="text-align:right;width:50%">
-						Page <?php echo $this->getAliasNumPage() ?> of <?php echo $this->getAliasNbPages() ?>
-					</td>
-				</tr>
-			</table>
-<?php 
-			$output = ob_get_clean(); 
-			$this->writeHTMLCell(0,0,'','',$output,0,1);
-									
-		} // end footer
-	} // end Result
-} // end if exists
+		<table nobr="true" style="width:100%;border:1px solid black;padding:0 5px">
+			<tr>
+				<td style="border:1px solid black;vertical-align:top;">
+					<small>Accession Number</small><br/><b><?php echo $message->control_id ?></b>
+				</td>
+				<td style="border:1px solid black;vertical-align:top;">
+					<small>Patient ID</small><br/>
+					<b><?php echo ($message->pubpid) ? $message->pubpid : $message->pid ?></b>
+				</td>
+				<td style="border:1px solid black;vertical-align:top;">
+					<small>Account Number</small><br/>
+					<b><?php echo $message->account ?></b>
+				</td>
+				<td style="border:1px solid black;vertical-align:top;">
+					<small>Order Number</small><br/>
+					<b><?php echo $message->order_number ?></b>
+				</td>
+				<td style="border:1px solid black;vertical-align:top;">
+					<small>Report Status</small><br/>
+					<b><?php echo $message->report_status ?></b>
+				</td>
+			</tr>
+		</table>
 
-/**
- *
- * The makeResultDocuments() creates a PDF requisition.
- *
- * 1. Create a PDF requisition document
- * 2. Store the document in the repository
- * 4. Return a reference to the document
- *
- * @access public
- * @param Request $request object
- * @return string $document PDF document as string
- * 
- */
-if (!function_exists("makeResultDocument")) {
+		<table nobr="true" style="width:100%;padding:10px 0;font-size:1.2em">
+			<tr>
+				<td style="text-align:left;width:50%">
+					<?php echo date('m/d/Y h:i A') ?>
+				</td>
+				<td style="text-align:right;width:50%">
+					Page {nb} {nbpg}
+				</td>
+			</tr>
+		</table>
+<?php 
+		$output = ob_get_clean(); 
+		return $output;
+		
+	} // end footer
+
 	/**
 	 * The makeResultDocument function is used to generate the requisition for
-	 * the laboratory interface. It utilizes the TCPDF library routines to 
+	 * the laboratory interface. It utilizes the mPDF library routines to
 	 * generate the PDF document.
 	 *
 	 * @param Order $order object containing original input data
 	 * @param Request $request object containing prepared request data
-	 * 
+	 * @return string $document PDF document as string
 	 */
 	function makeResultDocument(&$message, &$lab_data) {
 		// get client information
 		global $client_address;
 		
 		// fetch order detail records
-		$item_list = wmtOrderItem::fetchItemList($message->order_number);
+		$item_list = OrderItem::fetchItemList($message->order_number);
 		
 		// fetch patient record
-		$patient = false;
+		$pat_data = false;
 		if ($message->pid) { // we should have a patient
-			$patient = wmtPatient::getPidPatient($message->pid);
-			if (!$message->pubpid) $message->pubpid = $patient->pubpid;
+			$pat_data = Patient::getPidPatient($message->pid);
+			if (!$message->pubpid) $message->pubpid = $pat_data->pubpid;
 		}
 		
 		// if no patient found
-		if (! $patient) { // no patient (or could not find)
-			$patient = new wmtPatient();
+		if (! $pat_data) { // no patient (or could not find)
+			$pat_data = new Patient();
 			
-			$patient->lname = $message->name[0];
-			$patient->fname = $message->name[1];
-			$patient->mname = $message->name[2];
-			$patient->DOB = $message->dob;
-			$patient->pubpid = ($message->pubpid)? $message->pubpid : $message->external_id;
-			$patient->sex = $message->sex;
-			$patient->ss = $message->ss;
-			$patient->phone_home = $message->phone;
+			$pat_data->lname = $message->name[0];
+			$pat_data->fname = $message->name[1];
+			$pat_data->mname = $message->name[2];
+			$pat_data->DOB = $message->dob;
+			$pat_data->pubpid = ($message->pubpid)? $message->pubpid : $message->external_id;
+			$pat_data->sex = $message->sex;
+			$pat_data->ss = $message->ss;
+			$pat_data->phone_home = $message->phone;
 			
 			if ($message->address && is_array($message->address)) {
-				$patient->street = $message->address[0];
-				if ($message->address[1]) $patient->street .= "<br/>".$message->address[1];
-				$patient->city = $message->address[2];
-				$patient->state = $message->address[3];
-				$patient->postal_code = $message->address[4];
+				$pat_data->street = $message->address[0];
+				if ($message->address[1]) $pat_data->street .= "<br/>".$message->address[1];
+				$pat_data->city = $message->address[2];
+				$pat_data->state = $message->address[3];
+				$pat_data->postal_code = $message->address[4];
 			}
 		}
 		
 		// SPECIAL FOR CERNER (use lab pid as pubpid)
-		if ($lab_data['npi'] == 'CERNER' && $message->external_pid) {
-			$patient->pubpid = $message->external_pid;
+		if ($lab_data->npi == 'CERNER' && $message->external_pid) {
+			$pat_data->pubpid = $message->external_pid;
 		}
 		
 		$client_address = "Unknown Site Identifier:<br/>";
@@ -350,175 +329,168 @@ if (!function_exists("makeResultDocument")) {
 		}
 		
 		// create new PDF document
-		$pdf = new ResultReport('P', 'pt', 'letter', true, 'UTF-8', false);
-
+		$config = [
+			'mode' 				=> 'utf-8',
+			'orientation' 		=> 'P',
+			'default_font_size'	=> '10px',
+			'default_font' 		=> 'dejavusans',
+			'pagenumPrefix' 	=> 'Page ',
+			'nbpgPrefix' 		=> ' of ',
+			'nbpgSuffix' 		=> '',
+			'setAutoTopMargin'	=> 'stretch'
+		];
+		$pdf = new Mpdf($config);
+		$pdf->text_input_as_HTML = true;
+		
 		// set document information
 		$pdf->SetCreator('OpenEMR');
 		$pdf->SetAuthor('Williams Medical Technologies, Inc.');
 		$pdf->SetTitle('Result Observations - '.$message->order_number);
-		$pdf->SetSubject($lab_data['name'].' Results');
-		$pdf->SetKeywords($lab_data['name'].', WMT, results, observation');
+		
+		// set default styles
+		$style = <<<EOD
+.pdf_title {font-size:18px;font-weight:bold;}
+.pdf_subtitle {font-size:14px;font-weight:bold;}
+.pdf_section {font-size:9px;font-weight:bold;background-color:#dcdcdc;border:1px solid black;padding:2px 4px;}
+.pdf_label {font-size:10px;font-weight:normal;text-align:right;width:100px;vertical-align:top;padding-left:4px;}
+.pdf_data {font-size:10px;font-weight:bold;text-align:left;vertical-align:top;padding-left:4px;}
+.pdf_border {border:1px solid black;}
+.barcode {padding:1.5mm;margin:0;vertical-align:top;color:#000000;}
+.barcodecell {text-align:center;vertical-align:middle;padding:0;}
+table {width:100%;border-collapse:collapse;}
+EOD;
 
-		// set header and footer fonts
-		$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-		$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
-		// set default monospaced font
-		$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-		// set initial margins
-		$pdf->SetMargins(PDF_MARGIN_LEFT, 105, PDF_MARGIN_RIGHT); // 80
-		$pdf->SetHeaderMargin(15);
-		$pdf->SetFooterMargin(60);
-		//$pdf->setPrintHeader(false);
-		//$pdf->setPrintFooter(false);
-	
-		// set auto page breaks / bottom margin
-		$pdf->SetAutoPageBreak(TRUE, 65);
-
-		// set image scale factor
-		$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-		$pdf->setJPEGQuality ( 100 );
-
-		$pdf->setLanguageArray($l);
-
-		// set font
-		$pdf->SetFont('helvetica', '', 10);
-
+		$pdf->WriteHTML($style,1);
+		
+		$pdf->SetHTMLHeader(self::HeaderFirst());
+		$pdf->SetHTMLFooter(self::Footer());
+		
 		// start page
 		$pdf->AddPage();
-
+		
 		// result image storage
 		$images = $message->images;
 		
 		// truncate the lab number at Cerner 
-		$message->lab_number = (strlen($message->lab_number) > 18) ? substr($message->lab_number,0,15).'...' : $message->lab_number;
+		$message->control_id = (strlen($message->control_id) > 18) ? substr($message->control_id,0,15).'...' : $message->control_id;
 		
 		ob_start();
 ?>
-<table nobr="true" style="width:100%;border:1px solid black;padding:0 5px">
+<table nobr="true" style="width:100%;">
 	<tr>
-		<td style="border:1px solid black">
-			<small>Accession Number</small><br/><b><?php echo $message->lab_number; ?></b>
+		<td style="width:20%;border:1px solid black">
+			<small>Accession Number</small><br/><b><?php echo $message->control_id; ?></b>
 		</td>
-		<td style="border:1px solid black">
+		<td style="width:20%;border:1px solid black">
 			<small>Patient ID</small><br/>
-			<b><?php $pubpid = ($message->pubpid) ? $message->pubpid : $message->extpid; 
-					echo ($pubpid) ? $pubpid : $message->pid ?></b>
+			<b><?php $pubpid = ($message->pubpid) ? $message->pubpid : $pat_data->pubpid; 
+					echo ($pubpid) ? $pubpid : $pat_data->pid ?></b>
 		</td>
-		<td style="border:1px solid black">
-			<small>Order Number</small><br/>
-			<b><?php echo $message->order_number ?></b>
-		</td>
-		<td style="border:1px solid black">
+		<td style="width:20%;border:1px solid black">
 			<small>Account Number</small><br/>
 			<b><?php echo $message->account ?></b>
 		</td>
-		<td style="border:1px solid black">
+		<td style="width:20%;border:1px solid black">
+			<small>Order Number</small><br/>
+			<b><?php echo $message->order_number ?></b>
+		</td>
+		<td style="width:20%;border:1px solid black">
 			<small>Report Status</small><br/>
 			<b><?php echo $message->report_status ?></b>
 		</td>
 	</tr>
 </table>
-<?php 
-		$output = ob_get_clean(); 
-		$pdf->writeHTMLCell(0,0,'','',$output,0,1);
-		
-		ob_start();
-?>
-<table nobr="true" style="width:100%;border:1px solid black;padding:0 5px">
+<table nobr="true" style="width:100%;">
 	<tr>
-		<td colspan="3" width="50%" style="border:1px solid black">
-			<small>Patient Name</small><br/>
-			<b><?php echo $patient->lname.", ".$patient->fname." ".$patient->mname ?></b>
+		<td style="width:50%;padding:0;">
+			<table style="margin:0">
+				<tr>
+					<td colspan="3" style="border:1px solid black;border-top:none;">
+						<small>Patient Name</small><br/>
+						<b><?php echo $pat_data->lname.", ".$pat_data->fname." ".$pat_data->mname ?></b>
+					</td>
+				</tr>
+				<tr>
+					<td style="border:1px solid black;vertical-align:top;">
+						<small>Date of Birth</small><br/>
+						<b><?php if ($pat_data->DOB) echo ( date('Y-m-d',strtotime($pat_data->DOB)) ) ?></b>
+					</td>
+					<td style="border:1px solid black;vertical-align:top;">
+						<small>Patient Age</small><br/>
+						<b><?php if ($pat_data->DOB) echo ( floor((time() - strtotime($pat_data->DOB)) / 31556926) ) ?></b>
+					</td>
+					<td style="border:1px solid black;vertical-align:top;">
+						<small>Gender</small><br/>
+						<b><?php echo $pat_data->sex ?></b>
+					</td>
+				</tr>
+				<tr>
+					<td style="border:1px solid black;vertical-align:top;">
+						<small>Alt Patient Id</small><br/>
+						<b><?php echo ($pat_data->pid) ? $pat_data->pid : ''; // pid displayed as pubpid above if pubpid missing ?></b>
+					</td>
+					<td style="border:1px solid black;vertical-align:top;">
+						<small>Patient SS#</small><br/>
+						<b><?php echo $pat_data->ss ?></b>
+					</td>
+					<td style="border:1px solid black;vertical-align:top;">
+						<small>Patient Phone</small><br/>
+						<b><?php echo $pat_data->phone_home ?></b>
+					</td>
+				</tr>
+			</table>
 		</td>
-		<td rowspan="3" colspan="2" width="50%">
+		<td style="width:50%;vertical-align:top;border:1px solid black;border-left:none;border-top:none;">
 			<small>Client Address</small><br/>
 			<b><?php echo $client_address ?></b>
 		</td>
 	</tr>
 	<tr>
-		<td style="border:1px solid black">
-			<small>Date of Birth</small><br/>
-			<b><?php if ($patient->DOB) echo ( date('Y-m-d',strtotime($patient->DOB)) ) ?></b>
-		</td>
-		<td style="border:1px solid black">
-			<small>Patient Age</small><br/>
-			<b><?php if ($patient->DOB) echo ( floor((time() - strtotime($patient->DOB)) / 31556926) ) ?></b>
-		</td>
-		<td style="border:1px solid black">
-			<small>Gender</small><br/>
-			<b><?php echo $patient->sex ?></b>
-		</td>
-	</tr>
-	<tr>
-		<td style="border:1px solid black">
-			<small>Alt Patient Id</small><br/>
-			<b><?php echo ($pubpid) ? $patient->pid : ''; // pid displayed as pubpid above if pubpid missing ?></b>
-		</td>
-		<td style="border:1px solid black">
-			<small>Patient SS#</small><br/>
-			<b><?php echo $patient->ss ?></b>
-		</td>
-		<td style="border:1px solid black">
-			<small>Patient Phone</small><br/>
-			<b><?php echo $patient->phone_home ?></b>
-		</td>
-	</tr>
-	<tr>
-		<td colspan="3" style="border:1px solid black">
+		<td style="width:50%;border:1px solid black;border-top:none;border-bottom:none;">
 			<small>Patient Address</small><br/>
-			<b><?php echo $patient->street ?>&nbsp;<br/>
-			<?php if ($patient->city) echo $patient->city.", " ?><?php echo $patient->state ?>  <?php echo $patient->postal_code ?></b>&nbsp;<br/>
+			<b><?php echo $pat_data->street ?>&nbsp;<br/>
+			<?php if ($pat_data->city) echo $pat_data->city.", " ?><?php echo $pat_data->state ?>  <?php echo $pat_data->postal_code ?></b>&nbsp;<br/>
 		</td>
-		<td width="50%"  style="border:1px solid black">
+		<td style="width:50%;border-right:1px solid black;vertical-align:top;">
 			<small>Additional Information</small><br/><b><?php echo $message->additional_data; ?></b>
-<?php 
-//		$notes = 0;
-//		if (count($message->notes) > 0) {
-//			foreach ($message->notes AS $note) {
-//				echo "<b>".$note ."</b><br/>\n";
-//				if ($notes++ == 3) break;
-//			}
-//		}
-?>
 		</td>
 	</tr>
 </table>
 <?php 
 		$output = ob_get_clean(); 
-		$pdf->writeHTMLCell(0,0,'','',$output,0,1);
+		$pdf->writeHTML($output,2);
+		
 		ob_start();
 ?>
-<table nobr="true" style="width:100%;border:1px solid black;padding:0 5px">
+<table nobr="true" style="width:100%;border:1px solid black;padding:0 5px;border-top:none;">
 	<tr>
-		<td style="border:1px solid black">
-			<?php $label = ($lab_data['type'] == 'radiology' || $lab_data['type'] == 'internal')? "Date/Time Ordered" : "Date/Time Collected"; ?>
+		<td style="width:20%;border:1px solid black;vertical-align:top;">
+			<?php $label = ($lab_data->type == 'radiology' || $lab_data->type == 'internal')? "Date/Time Ordered" : "Date/Time Collected"; ?>
 			<small><?php echo $label ?></small><br/>
 			<b><?php echo ($message->specimen_datetime) ? date('Y-m-d h:i A', strtotime($message->specimen_datetime)) : '' ?></b>
 		</td>
-		<td style="border:1px solid black">
-			<?php $label = ($lab_data['type'] == 'radiology' || $lab_data['type'] == 'internal')? "Date/Time Processed" : "Date/Time Received"; ?>
+		<td style="width:20%;border:1px solid black;vertical-align:top;">
+			<?php $label = ($lab_data->type == 'radiology' || $lab_data->type == 'internal')? "Date/Time Processed" : "Date/Time Received"; ?>
 			<small><?php echo $label ?></small><br/>
 			<b><?php echo ($message->received_datetime) ? date('Y-m-d h:i A', strtotime($message->received_datetime)) : '' ?></b>
 		</td>
-		<td style="border:1px solid black">
+		<td style="width:20%;border:1px solid black;vertical-align:top;">
 			<small>Date/Time Reported</small><br/>
 			<b><?php echo date('Y-m-d h:i A', strtotime($message->reported_datetime)) ?></b>
 		</td>
-		<td style="border:1px solid black">
+		<td style="width:20%;border:1px solid black;vertical-align:top;">
 			<small>Physician Name</small><br/>
 			<b><?php if ($message->provider[1]) echo substr($message->provider[2], 0, 1)." ".$message->provider[1] ?></b>
 		</td>
-		<td style="border:1px solid black">
+		<td style="width:20%;border:1px solid black;vertical-align:top;">
 			<small>NPI Number</small><br/>
-			<b><?php echo $message->provider[0] ?></b>
+			<b><?php echo $message->provider[8] ?></b>
 		</td>
 	</tr>
 </table>
 <?php 
 		$output = ob_get_clean(); 
-		$pdf->writeHTMLCell(0,0,'','',$output,0,1);
+		$pdf->writeHTML($output,2);
 		$pdf->ln(5);
 					
 		$count = 0;
@@ -535,7 +507,7 @@ if (!function_exists("makeResultDocument")) {
 		}
 		REPLACE WITH FOLLOWING */
 		foreach ($item_list as $order_item) {
-			$report_data = wmtResult::fetchResult($order_item->procedure_order_id, $order_item->procedure_order_seq);
+			$report_data = Result::fetchResult($order_item->procedure_order_id, $order_item->procedure_order_seq);
 			if (!$report_data || $codes[$order_item->procedure_code]) continue; // no results yet
 			$codes[$order_item->procedure_code] = true;
 			if ($tests) $tests .= "; ";
@@ -555,10 +527,10 @@ if (!function_exists("makeResultDocument")) {
 </table>
 <?php 
 		$output = ob_get_clean(); 
-		$pdf->writeHTMLCell(0,0,'','',$output,0,1);
+		$pdf->writeHTML($output,2);
 
 		$note_text = '';
-		if (count($message->notes) > 0) {
+		if (!empty($message->notes)) {
 			foreach ($message->notes AS $note) {
 				$note_text .= nl2br($note->comment);
 			}
@@ -585,7 +557,7 @@ if (!function_exists("makeResultDocument")) {
 </table>
 <?php 
 			$output = ob_get_clean(); 
-			$pdf->writeHTMLCell(0,0,'','',$output,0,1);
+			$pdf->writeHTML($output,2);
 		} // end if lab comments
 		
 		$pdf->ln(5);
@@ -594,12 +566,12 @@ if (!function_exists("makeResultDocument")) {
 		// loop through each ordered item
 		$last_code = "FIRST";
 		foreach ($item_list as $order_item) {
-			$report_data = wmtResult::fetchResult($order_item->procedure_order_id, $order_item->procedure_order_seq);
+			$report_data = Result::fetchResult($order_item->procedure_order_id, $order_item->procedure_order_seq);
 			if (!$report_data) continue; // no results yet
 
 			$reflex_data = '';
 			if ($order_item->reflex_code) {
-				$reflex_data = wmtResult::fetchReflex($report_data->procedure_order_id, $order_item->reflex_code, $order_item->reflex_set);
+				$reflex_data = Result::fetchReflex($report_data->procedure_order_id, $order_item->reflex_code, $order_item->reflex_set);
 			}
 ?>
 <table style="width:100%">
@@ -636,7 +608,7 @@ if (!function_exists("makeResultDocument")) {
 <?php 
 			$last_code = $order_item->procedure_code;
 			
-			$specimen_list = wmtSpecimenItem::fetchItemList($report_data->procedure_report_id);
+//			$specimen_list = SpecimenItem::fetchItemList($report_data->procedure_report_id);
 			if ($specimen_list) {
 ?>					
 <table style="width:100%">
@@ -676,7 +648,7 @@ if (!function_exists("makeResultDocument")) {
 					}
 		
 					// SPECIAL FOR CERNER (strip leading zeros)
-					if ($lab_data['npi'] == 'CERNER') {
+					if ($lab_data->npi == 'CERNER') {
 						$specimen_data->specimen_number = ltrim($specimen_data->specimen_number,'0');
 					}
 		
@@ -697,7 +669,7 @@ if (!function_exists("makeResultDocument")) {
 			<?php echo ($specimen_data->specimen_type)? $specimen_data->specimen_type : 'UNKNOWN'; ?>
 			<?php if ($specimen_data->type_modifier) echo "<br/>Modifier: $specimen_data->type_modifier"; ?>		
 			<?php if ($specimen_data->specimen_additive) echo "<br/>Additive: $specimen_data->specimen_additive"; ?>		
-			<?php if ($specimen_data->collection_method && $lab_data['npi'] != "CERNER") echo "<br/>Method: $specimen_data->collection_method"; ?>		
+			<?php if ($specimen_data->collection_method && $lab_data->npi != "CERNER") echo "<br/>Method: $specimen_data->collection_method"; ?>		
 			<?php if ($specimen_data->source_site) {
 				echo "<br/>Source: $specimen_data->source_site"; 
 				if ($specimen_data->source_quantifier && $specimen_data->source_site != $specimen_data->source_quantifier) 
@@ -715,47 +687,47 @@ if (!function_exists("makeResultDocument")) {
 	 			} // end specimens
 			} // end if specimens
 			
-			$result_list = wmtResultItem::fetchItemList($report_data->procedure_report_id);
+			$result_list = ResultItem::fetchItemList($report_data->procedure_report_id);
 			if ($result_list) {
 
 ?>	
 <table style="width:100%">
 	<tr style="font-size:8px;font-weight:bold;">
 		<td style="width:15px">&nbsp;</td>
-<?php if ($lab_data['type'] == 'radiology') { ?>
+<?php if ($lab_data->type == 'radiology') { ?>
 		<td colspan="4" style="width:65%">
-			RESULT DESCRIPTION
+			<small><u>RESULT DESCRIPTION</u></small>
 		</td>
 		<td style="text-align:center;width:11%">
-			REPORTED
+			<small><u>REPORTED</u></small>
 		</td>
 		<td style="text-align:center;width:9%">
-			STATUS
+			<small><u>STATUS</u></small>
 		</td>
 		<td style="text-align:center;width:11%">
-			FACILITY
+			<small><u>FACILITY</u></small>
 		</td>
 <?php } else { ?>
 		<td style="width:25%">
-			RESULT
+			<small><u>RESULT</u></small>
 		</td>
 		<td style="width:13%">
-			VALUE
+			<small><u>VALUE</u></small>
 		</td>
 		<td style="width:13%">
-			UNITS
+			<small><u>UNITS</u></small>
 		</td>
 		<td style="width:13%">
-			REFERENCE
+			<small><u>REFERENCE</u></small>
 		</td>
 		<td style="text-align:center;width:11%">
-			FLAG
+			<small><u>FLAG</u></small>
 		</td>
 		<td style="text-align:center;width:9%">
-			STATUS
+			<small><u>STATUS</u></small>
 		</td>
 		<td style="text-align:center;width:11%">
-			FACILITY
+			<small><u>FACILITY</u></small>
 		</td>
 <?php } // END HEADER ?>
 		<td></td>
@@ -788,7 +760,7 @@ if (!function_exists("makeResultDocument")) {
 		<td style="width:15px">&nbsp;</td>
 
 <?php  				// ------------- RADIOLOGY -------------
-					if ($lab_data['type'] == 'radiology') { // SPECIAL FOR RADIOLOGY 
+					if ($lab_data->type == 'radiology') { // SPECIAL FOR RADIOLOGY 
 						if ($result_data->result_data_type == 'RP') { // put LINK on same line
 ?>
 		<td colspan="2">
@@ -882,7 +854,7 @@ if (!function_exists("makeResultDocument")) {
 		<td style="text-align:center">
 			<?php
 				$lab_code = $result_data->facility;
-				if ($lab_data['npi'] == 'BBPL') $lab_code = 'BBPL';
+				if ($lab_data->npi == 'BBPL') $lab_code = 'BBPL';
 				echo htmlentities($lab_code) ?>
 		</td>
 		<td></td>
@@ -919,7 +891,7 @@ if (!function_exists("makeResultDocument")) {
 		<td style="font-family:monospace;text-align:center;font-size:10px">
 			<?php
 				$lab_code = $result_data->facility;
-				if ($lab_data['npi'] == 'BBPL') $lab_code = 'BBPL';
+				if ($lab_data->npi == 'BBPL') $lab_code = 'BBPL';
 				echo htmlentities($lab_code) ?>
 		</td>
 		<td></td>
@@ -976,7 +948,7 @@ results are more likely when prevalence is high.<br/>
 		
 		$output = ob_get_clean(); 
 //echo "<pre>".htmlspecialchars($output)."</pre>"; // DEBUGGING
-		$pdf->writeHTMLCell(0,0,'','',$output,0,1);
+		$pdf->writeHTML($output,2);
 		$pdf->ln(20);
 
 		// do we need a facility box at all?
@@ -1054,11 +1026,8 @@ results are more likely when prevalence is high.<br/>
 </table>
 <?php 		
 			$output = ob_get_clean();
-			$pdf->writeHTMLCell(0,0,'','',$output,0,1);
+			$pdf->writeHTML($output,2);
 		} // end of need facility box check
-
-		// finish page
-		$pdf->lastPage();
 
 		// generate the PDF document
 		$document = $pdf->Output('result.pdf','S'); // return as variable
@@ -1066,7 +1035,7 @@ results are more likely when prevalence is high.<br/>
 		/* ************************************************************************************************* *
 		 *   CAPTURE AND ATTACH IMAGES TO PDF OUTPUT FILE                                                    *
 		 * ************************************************************************************************* */
-		if (count($images) > 0) { // we have image attachments
+		if (!empty($images)) { // we have image attachments
 			$pdfc = new ReportConcat('P', 'pt', 'letter', true, 'UTF-8', false);
 				
 			$pdfc->setPrintHeader(false);

@@ -167,29 +167,29 @@ class Encounter {
 			// insert into form table
 			$this->id = sqlInsert("INSERT INTO `form_encounter` SET $sql", $binds);
 
-			// insert into form index
-			$sql = "INSERT INTO `forms` ";
-			$sql .= "(date, encounter, form_name, form_id, pid, user, groupname, authorized, formdir) ";
-			$sql .= "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			
-			$binds = array();
-			$binds[] = $this->date;
-			$binds[] = $this->encounter;
-			$binds[] = $this->form_title;
-			$binds[] = $this->id;
-			$binds[] = $this->pid;
-			$binds[] = $this->user;
-			$binds[] = ($this->groupname)? $this->groupname : 'Default';
-			$binds[] = ($this->authorized)? 1 : 0;
-			$binds[] = 'newpatient';
-			
-			// run the insert
-			sqlInsert($sql, $binds);
-
 		} else { // do update
 			$binds[] = $this->id;		
 			sqlStatement("UPDATE `form_encounter` SET $sql WHERE `id` = ?",	$binds);
 		}
+		
+		// replace into form index
+		$sql = "REPLACE INTO `forms` ";
+		$sql .= "(date, encounter, form_name, form_id, pid, user, groupname, authorized, formdir) ";
+		$sql .= "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+		$binds = array();
+		$binds[] = $this->date;
+		$binds[] = $this->encounter;
+		$binds[] = $this->form_title;
+		$binds[] = $this->id;
+		$binds[] = $this->pid;
+		$binds[] = $this->user;
+		$binds[] = ($this->groupname)? $this->groupname : 'Default';
+		$binds[] = ($this->authorized)? 1 : 0;
+		$binds[] = 'newpatient';
+		
+		// run the insert
+		sqlInsert($sql, $binds);
 		
 		return $this->id;
 	}

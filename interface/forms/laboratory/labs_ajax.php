@@ -216,74 +216,43 @@ if ($type == 'label') {
 	$count = 1;
 	if ($_REQUEST['count']) $count = $_REQUEST['count'];
 	
-	//require_once($GLOBALS['vendor_dir']."/tecnickcom/tcpdf/tcpdf.php");
-	//require_once("{$GLOBALS['fileroot']}/library/tcpdf/tcpdf.php");
-	
 	// create new PDF document
 	$config = [
-					'mode' 				=> 'utf-8',
-					'orientation' 		=> 'P',
-					'default_font_size'	=> '10px',
-					'default_font' 		=> 'times'
+		'mode' 				=> 'utf-8',
+		'orientation' 		=> 'P',
+		'default_font_size'	=> '7px',
+		'default_font' 		=> 'times',
+		'margin-top'		=> 0,
+		'margin-bottom'		=> 0,
+		'margin-left'		=> 0,
+		'margin-right'		=> 0,
+		'margin-header'		=> 0,
+		'margin-footer'		=> 0,
+		'autoPageBreak'		=> false,
+		'autoMarginPadding'	=> 0,
+		'marginBuffer'		=> 0,
+		'bleedMargin'		=> 0,
+		'format'			=> [51,19]
 	];
 	$pdf = new Mpdf($config);
-	$pdf->text_input_as_HTML = true;
 	
-	// set document information
-	$pdf->SetCreator('OpenEMR');
-	$pdf->SetAuthor('Williams Medical Technologies, Inc.');
-	$pdf->SetTitle($lab_data['name'].' Order #'.$order_data->request_account."-".$order_data->order_number);
+	do {
+		$pdf->AddPage();
+		$pdf->WriteText(2, 4, 'Client #:' . $account);
+		$pdf->WriteText(2, 7, 'Order #:' . $order);
+		$pdf->WriteText(2, 10, $patient);
+		$pdf->WriteBarcode2($account.'-'.$order, 2, 11, 0.6, 1, false, false, 'c39', '');
+	} while ($count-- > 1);
+
 	
-	// set default styles
-	$style = <<<EOD
-.bardata {padding:0;margin:0 0 0 6px;font-size:9px;line-height:11px;}
-.barname {padding:0;margin:0 0 3px 6px;font-weight:bold;font-size:11px;line-height:13px;}
-.barcode {padding:0;margin:0;vertical-align:top;color:#000000;}
-.barcodecell {text-align:left;margin:0;padding:0;}
-EOD;
-	$pdf->WriteHTML($style,1);
+	
+	//$pdf->writeHTML($barcode);
+	//$pdf->WriteText(1, 2, $barcode);
 	
 	// ---------------------------------------------------------
 	
-		do {
-//			$pdf->AddPage();
-	
-//		$pdf->SetFont('times', '', 7);
-//		$pdf->Cell(0,5,'Client #: '.$account,0,1);
-//		$pdf->Cell(0,5,'Order #: '.$order,0,1);
-	
-//		$pdf->SetFont('times', 'B', 8);
-//	$pdf->Cell(0,0,$patient,0,1,'','','',1);
-	
-//		$pdf->writeBarcode($client.'-'.$order, 'C39', '', '', 110, 25, '', $style, 'N');
-// assemble bar code
-$barcode = '<div class="barcodecell">';
-$barcode .= '<div class="bardata">Client #: 612600</div>';
-$barcode .= '<div class="bardata">Order #: 93994882</div>';
-$barcode .= '<div class="barname">CRISWELL, RONALD CURTIS</div>';
-$barcode .= '<barcode type="C39" class="barcode" size="0.45" height="1.6" code="';
-$barcode .= $account;
-$barcode .= "-";
-$barcode .= $order;
-$barcode .= '"/></div>';
-
-$pdf->writeHTML($barcode,2);
-
-//$barcode = '<div class="barcodecell"><barcode type="C39" class="barcode" code="';
-//			$barcode .= $account.'-'.$order;
-//			$barcode .= "'/></div>";
-//			$pdf->WriteHTML($barcode);
-			//$pdf->WriteBarcode("123456789");
-//		Mpdf\Mpdf::WriteBarcode($code, $showtext=1, $x='', $y='', $size=1, $border=0, $paddingL=1, $paddingR=1, $paddingT=2, $paddingB=2, $height=1, $bgcol=false, $col=false, $btype='ISBN', $supplement='0', $supplement_code='', $k=1) 
-//		Mpdf\Mpdf::WriteBarcode2($code, $x='', $y='', $size=1, $height=1, $bgcol=false, $col=false, $btype='IMB', $print_ratio='', $k=1, $quiet_zone_left=null, $quiet_zone_right=null)
-			$count--;
-		
-		} while ($count > 0);
-
-		// ---------------------------------------------------------
-	
-		// get the content
-		$content = $pdf->Output($label_file,'S');
+	// get the content
+	$content = $pdf->Output($label_file,'S');
 	
 	if ($printer == 'file') {
 		// save and print the new document

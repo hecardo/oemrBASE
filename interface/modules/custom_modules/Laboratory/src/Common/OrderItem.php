@@ -1,5 +1,5 @@
 <?php
-//**
+/**
  * @package   	WMT
  * @subpackage	Laboratory
  * @author    	Ron Criswell <ron.criswell@medtechsvcs.com>

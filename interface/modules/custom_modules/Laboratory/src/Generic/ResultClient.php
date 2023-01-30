@@ -221,7 +221,7 @@ class ResultClient {
 				}
 			}
 			
-			echo "\n".$new." Records Available";
+			echo "\n".$new." Records Available\n";
 			if ($more_results) echo " (MORE RESULTS)";
 			
 			if ($DEBUG) {

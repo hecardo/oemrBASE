@@ -7,7 +7,7 @@
  */
 
 /**
- * All new classes are defined in the MDTS namespace
+ * All new classes are defined in the WMT namespace
  */
 namespace WMT\Objects;
 
@@ -82,7 +82,7 @@ class User {
 	 * information from the database or creates an empty object.
 	 *
 	 * @param int $id record identifier
-	 * @return object instance of mdtsUser class
+	 * @return object instance of WMTUser class
 	 */
 	public function __construct($id = false) {
 		// create empty record or retrieve
@@ -127,7 +127,7 @@ class User {
 			}
 		}
 		else {
-			throw new \Exception('mdtsUser::_construct - no record with user id ('.$id.').');
+			throw new \Exception('WMTUser::_construct - no record with user id ('.$id.').');
 		}
 
 		// preformat commonly used data elements
@@ -182,7 +182,7 @@ class User {
 	 */
 	public static function fetchUserName($name=false, $active=false) {
 		if (!$name) {
-			throw new \Exception('mdtsUser::fetchUserName - missing user name parameter');
+			throw new \Exception('WMTUser::fetchUserName - missing user name parameter');
 		}
 		
 		$query = "SELECT `id` FROM `users` WHERE `username` LIKE ? ";
@@ -194,7 +194,7 @@ class User {
 
 		// validate
 		if (!$data || !$data['id']) {
-			throw new \Exception('mdtsUser::fetchUserName - no record with user name ('.$name.').');
+			throw new \Exception('WMTUser::fetchUserName - no record with user name ('.$name.').');
 		}
 		
 		// create the object
@@ -211,7 +211,7 @@ class User {
 	 */
 	public static function fetchUserNPI($npi=false, $active=false) {
 		if (!$npi) {
-			throw new \Exception('mdtsUser::fetchUserNPI - missing user NPI number parameter');
+			throw new \Exception('WMTUser::fetchUserNPI - missing user NPI number parameter');
 		}
 		
 		$query = "SELECT `id` FROM `users` WHERE `npi` LIKE ? ";

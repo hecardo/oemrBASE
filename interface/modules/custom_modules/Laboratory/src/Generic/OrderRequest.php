@@ -124,7 +124,7 @@ EOD;
 
 	/**
 	 * The makeOrderDocument function is used to generate the requisition for
-	 * the LabCorp interface. It utilizes the TCPDF library routines to 
+	 * the LabCorp interface. It utilizes the mPDF library routines to 
 	 * generate the PDF document.
 	 *
 	 * @param Order $order object containing original input data
@@ -159,7 +159,6 @@ EOD;
 			$provider = sqlQuery("SELECT * FROM users WHERE id = $order_data->provider_id LIMIT 1");
 		
 		// create new PDF document
-//		$pdf = new OrderRequest('P', 'pt', 'letter', true, 'UTF-8', false);
 		$config = [
 			'mode' 				=> 'utf-8',
 			'orientation' 		=> 'P',
@@ -193,31 +192,6 @@ EOD;
 
 		//		$pdf->SetHTMLHeader();
 		//		$pdf->SetHTMLFooter();
-		
-		/* set header and footer fonts
-		$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-		$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
-		// set default monospaced font
-		$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-		// set auto page breaks / bottom margin
-		$pdf->SetAutoPageBreak(TRUE, 65);
-
-		// set image scale factor
-		$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-		$pdf->setJPEGQuality ( 90 );
-
-		// $pdf->setLanguageArray($l);
-
-		// set font
-		$pdf->SetFont('helvetica', '', 10);
-
-		// set margins
-		$pdf->SetMargins(30, 30, 30);
-		$pdf->SetHeaderMargin(15);
-		$pdf->SetFooterMargin(90);
-		*/
 		
 		// start page
 		$pdf->AddPage();

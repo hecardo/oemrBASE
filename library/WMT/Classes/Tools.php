@@ -88,7 +88,7 @@ class Tools {
 	 */
 	public static function FormatDate($date, $format='Y-m-d') {
 		$seconds = Self::GetSeconds($date);
-		if (!$seconds) return '';
+		if (strpos($date, '0000-00-00') !== false || !$seconds) return '';
 			
 		$date = date($format, $seconds);
 			
@@ -108,7 +108,7 @@ class Tools {
 	 */
 	public static function FormatTime($date, $format='H:i') {
 		$seconds = Self::GetSeconds($date);
-		if (!$seconds) return '';
+		if (strpos($date, '0000-00-00') !== false || !$seconds) return '';
 			
 		$time = date($format, $seconds);
 			
@@ -128,7 +128,7 @@ class Tools {
 	 */
 	public static function FormatDateTime($date, $format='Y-m-d H:i:s') {
 		$seconds = Self::GetSeconds($date);
-		if (!$seconds) return '';
+		if (strpos($date, '0000-00-00') !== false || !$seconds) return '';
 			
 		$datetime = date($format, $seconds);
 			

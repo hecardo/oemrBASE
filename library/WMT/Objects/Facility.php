@@ -1,33 +1,15 @@
 <?php
-/** *******************************************************************************************
- *	FACILITY
- *
- *	Copyright (c)2019 - Medical Technology Services <MDTechSvcs.com>
- *
- *	This program is free software: you can redistribute it and/or modify it under the 
- *  terms of the GNU General Public License as published by the Free Software Foundation, 
- *  either version 3 of the License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful, but WITHOUT ANY
- *	WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- *  PARTICULAR PURPOSE. DISTRIBUTOR IS NOT LIABLE TO USER FOR ANY DAMAGES, INCLUDING 
- *  COMPENSATORY, SPECIAL, INCIDENTAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL DAMAGES, 
- *  CONNECTED WITH OR RESULTING FROM THIS AGREEMENT OR USE OF THIS SOFTWARE.
- *
- *	See the GNU General Public License <http://www.gnu.org/licenses/> for more details.
- *
- *  @package mdts
- *  @subpackage facility
- *  @version 2.0.0
- *  @copyright Medical Technology Services
- *  @author Ron Criswell <ron.criswell@MDTechSvcs.com>
- *
- ******************************************************************************************** */
+**
+ * @package   WMT
+ * @author    Ron Criswell <ron@medtechsvcs.com>
+ * @copyright Copyright (c)2023 Medical Technilogy Services <https://medtechsvcs.com/>
+ * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
+ */
 
 /**
- * All new classes are defined in the WMT namespace
+ * All new classes are defined in the MDTS namespace
  */
-namespace mdts\objects;
+namespace WMT\Objects;
 
 /**
  *  Object definition for facility.

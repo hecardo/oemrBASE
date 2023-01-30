@@ -1376,7 +1376,7 @@ if ($order_data->status != 'i' && $order_data->status != 's' && $order_data->sta
 								<legend class="w-auto">Report Summary</legend>
 									
 <?php 
-	if (GetSeconds($order_data->report_datetime)) { // results available
+	if (Tools::GetSeconds($order_data->report_datetime)) { // results available
 		if ($order_data->control_id) {
 ?>
 								<div class="form-inline pb-1">
@@ -1435,7 +1435,7 @@ if ($order_data->status != 'i' && $order_data->status != 's' && $order_data->sta
 <?php 
 			$last_code = $order_item->procedure_code;
 			$result_list = LabResultItem::fetchItemList($report_data->procedure_report_id);
-			if (!result_list) continue; // no details yet
+			if (!$result_list) continue; // no details yet
 
 			// process each observation
 			$first = true;
@@ -1557,11 +1557,12 @@ if ($order_data->status != 'i' && $order_data->status != 's' && $order_data->sta
 <?php
 				} // end if observ 
 			} // end result foreach
-		} // end foreach ordered item
 ?>
 									</tbody>
 								</table>
 <?php 								
+		} // end foreach ordered item
+		
 		// do we need a facility box at all?
 		if (count($facility_list) > 0) {
 ?>
