@@ -46,10 +46,10 @@ use WMT\Laboratory\Labcorp;
 
 // Set defaults
 if (!empty($_REQUEST['from']) && strtotime($_REQUEST['from']) !== false) {
-	$from_date = date('Y-m-d', Tools::ToTime($_REQUEST['from']));
+	$from_date = date('Y-m-d', Tools::GetSeconds($_REQUEST['from']));
 }
 if (!empty($_REQUEST['thru']) && strtotime($_REQUEST['thru']) !== false) {
-	$thru_date = date('Y-m-d', Tools::ToTime($_REQUEST['thru']));
+	$thru_date = date('Y-m-d', Tools::GetSeconds($_REQUEST['thru']));
 }
 $lab_id = (isset($_REQUEST['lab']))? $_REQUEST['lab'] : false;
 $debug = (isset($_REQUEST['debug']))? $_REQUEST['debug'] : false;
@@ -60,7 +60,7 @@ if (!empty($lab_id)) {
 		if (!$batch) {
 			echo "<html><head><title>Result Processing</title><head><body><pre>"; 
 		}
-		echo "START OF BATCH PROCESSING: ".date('Y-m-d H:i:s')."\n\n";
+		echo "START OF BATCH PROCESSING: ".date('Y-m-d H:i:s')."\n";
 		
 		$reprocess = FALSE;
 		if ($from_date && !$thru_date) { // must have both
@@ -74,8 +74,7 @@ if (!empty($lab_id)) {
 		switch ($lab_data->type) {
 			case 'Q':
 				$client = new Quest\ResultClient($lab_id);
-				$client->buildRequest(25, $from_date, $thru_date);
-				$messages = $client->getResults(25, $debug);
+				$messages = $client->getResults(25, $from_date, $thru_date, $debug);
 				$reporter = false; // not needed with Quest
 				break;
 			case 'L':
@@ -545,7 +544,8 @@ if (!empty($lab_id)) {
 			 * --------------------------------------------------------------------------- */
 			
 			$items = array(); // for new tests
-			if (count($message->reports) > 0) { // do we have anything to process?
+			$count = (is_countable($message->reports))? count($message->reports) : 0;
+			if ($count > 0) { // do we have anything to process?
 				
 				// remove non-client order items from this order (lab added items)
 				sqlStatement("DELETE FROM `procedure_order_code` WHERE `procedure_order_id` = ? AND `procedure_source` != 1",
@@ -661,7 +661,8 @@ if (!empty($lab_id)) {
 					 *   Process each discrete result for the current report item
 					 * --------------------------------------------------------------------------- */
 					
-					if (count($report->results) > 0) { // do we have results for this order?
+					$count = (is_countable($report->results))? count($report->results) : 0;
+					if ($count > 0) { // do we have results for this order?
 						foreach ($report->results as $result) {
 							
 							// merge notes into a single field
@@ -883,15 +884,16 @@ if (!empty($lab_id)) {
 				$client->ackResult($message->message_id, $debug);
 			}
 			
+			$count = (is_countable($items))? count($items) : 0;
 			if ($debug) {
 				// display final results
 				echo "\n\n";
-				echo "STORED RECORDS: ".count($items);
+				echo "STORED RECORDS: ".$count;
 				echo "\nTOTAL DOCUMENTS: ".$doccnt;
 				echo "\nACKNOWLEDGMENT: [CA] Result processed (ORDER: ".$order_data->order_number." LAB: ".$message->control_id.")";
 			}
 			else {
-				echo "DATE: ".date('Y-m-d H:i:s')." -- ORDER: ".$order_data->order_number." -- LAB: ".$message->control_id." -- PID: ".$message->pid." -- DOCUMENTS: ".$doccnt." -- RESULTS: ".count($items)."\n";
+				echo "DATE: ".date('Y-m-d H:i:s')." -- ORDER: ".$order_data->order_number." -- LAB: ".$message->control_id." -- PID: ".$message->pid." -- DOCUMENTS: ".$doccnt." -- RESULTS: ".$count."\n";
 			}
 			
 			$output = ob_get_flush();
@@ -945,7 +947,8 @@ if (!empty($lab_id)) {
 		
 		
 		// send the acknowledgements
-		if ($lab_data->type == 'Q' && count($acks) > 0) {
+		$count = (is_countable($acks))? count($acks) : 0;
+		if ($lab_data->type == 'Q' && empty($from_date) && $count > 0) {
 			if ($debug) {
 				echo "\nACK RESPONSE ID: ".$response_id;
 				foreach ($acks AS $ack) {
@@ -955,7 +958,7 @@ if (!empty($lab_id)) {
 			$client->sendResultAck($response_id, $acks, $debug);
 		}
 		
-		echo "\nEND OF BATCH PROCESSING: ".date('Y-m-d H:i:s')."\n\n\n";
+		echo "\n\nEND OF BATCH PROCESSING: ".date('Y-m-d H:i:s')."\n\n\n";
 		exit();
 		
 	} catch (Exception $e) {

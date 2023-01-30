@@ -9,14 +9,12 @@
 
 namespace WMT\Laboratory\Quest;
 
-require_once 'ResultServices.php';
-require_once 'ParserHL7v23.php';
+use WMT\Laboratory\Quest\ParserHL7v23;
+use WMT\Laboratory\Common\Processor;
 
-use function mdts\ToTime;
-use function mdts\LogError;
-use function mdts\LogException;
+use WMT\Classes\Tools;
 
-use mdts\objects\Laboratory;
+require_once('ResultServices.php');
 
 /**
  * class ResultClient submits lab order (HL7 messages) to the MedPlus Hub
@@ -57,7 +55,7 @@ class ResultClient {
 	public function __construct($lab_id) {
 		// retrieve processor data
 		$this->lab_id = $lab_id;
-		$lab_data = new Laboratory($lab_id);
+		$lab_data = new Processor($lab_id);
 		
 		$this->REPOSITORY = $GLOBALS['oer_config']['documents']['repository'];
 			
@@ -73,11 +71,15 @@ class ResultClient {
 		$this->WSDL = $lab_data->remote_host.$lab_data->results_path;
 			
 		$category = sqlQuery("SELECT `id` FROM `categories` WHERE `name` LIKE ?", array($lab_data->name));
+		if (empty($category)) {
+			$category = sqlQuery("SELECT `id` FROM `categories` WHERE `name` LIKE 'Lab Report'");
+		}
 		$this->DOCUMENT_CATEGORY = $category['id'];
-
+		
+		
 		// sanity check
 		if ($lab_data->protocol != 'WS' ||
-			$lab_data->type != 'quest' ||
+			$lab_data->type != 'Q' ||
 				!$this->DOCUMENT_CATEGORY ||
  				!$this->RECEIVING_APPLICATION ||
 				!$this->RECEIVING_FACILITY ||
@@ -118,12 +120,22 @@ class ResultClient {
 		$response_id = null;
 		$more_results = false;
 		$this->messages = array();
+		
+		$start = $end = false;
+		if ($start_date) {
+			$start = date('m/d/Y', strtotime($start_date));
+			if ($end_date) {
+				$end = date('m/d/Y', strtotime($end_date));
+			} else {
+				$end = date('m/d/Y');
+			}
+		}
 			
 		try {
 			$this->request->retrieveFinalsOnly = TRUE;
 			$this->request->maxMessages = $max_messages;
-			if ($start_date) $this->request->startDate = $start_date;
-			if ($end_date) $this->request->endDate = $end_date;
+			if ($start) $this->request->startDate = $start;
+			if ($end) $this->request->endDate = $end;
 			
 			$response = $this->service->getResults($this->request);
 			$response_id = $response->requestId;
@@ -147,7 +159,7 @@ ORC|RE|195710|HL227889P||CM|||||||1528554102^GIBSON^SHERRELL^^^^^^^^^^NPI
 OBR|1|195710|HL227889P|91431^HIV 1/2 ANTIGEN/ANTIBODY,FOURTH GENERATION W/RFL^^91431XRGA=^HIV 1/2 ANTIGEN/ANTIBODY,FOURTH GENERATION W/RFL|||20220104104200|||||||20220105002500||1528554102^GIBSON^SHERRELL^^^^^^^^^^NPI|||||RGA^Quest Diagnostics-Houston Lab^5850 Rogerdale Road^Houston^TX^77072-1602^Robert L Breckenridge|20220106011000|||F
 OBX|1|TX|56888-1^HIV 1+2 Ab+HIV1 p24 Ag SerPl Ql IA^LN^86009052^HIV AG/AB, 4TH GEN^QDIDAL||NON-REACTIVE||NON-REACTIVE|N|||F|||20220106011000|RGA
 NTE|1||HIV-1 antigen and HIV-1/HIV-2 antibodies were not
-NTE|2||detected. There is no laboratory evidence of HIV
+NTE|2||detected. There is no Processor evidence of HIV
 NTE|3||infection.
 NTE|4|| 
 NTE|5||PLEASE NOTE: This information has been disclosed to
@@ -271,10 +283,11 @@ $result->resultId = 'bc2f47c98fb64f00b5b505ab8fd8bd16';
 $results[] = $result;
 //////////////////// DEBUG ///////////////////// */
 
-			echo "\n".count($results)." Results Returned";
+			$count = (is_countable($results))? count($results) : 0;
+			echo "\n$count Results Returned";
 			if ($more_results) echo " (MORE RESULTS)";
 			if ($debug) {
-				if (count($results)) echo "\nHL7 Messages:";
+				if ($count > 0) echo "\nHL7 Messages:";
 			}
 				
 			if ($results) {
@@ -284,7 +297,7 @@ $results[] = $result;
 						$options = array('debug'=>true);
 					}
 
-					$parser = new Parser_HL7v23($result->HL7Message,$options);
+					$parser = new ParserHL7v23($result->HL7Message,$options);
 					$parser->parse();
 					$message = $parser->getRequest();
 				
@@ -345,7 +358,8 @@ $results[] = $result;
 		
 		try {
 			if ($debug) {
-				echo "\n".count($acks)." Result Acknowledgments Sent";
+				$count = (is_countable($acks))? count($acks) : 0;
+				echo "\n$count Result Acknowledgments Sent";
 			}
 			
 			$response = $this->service->acknowledgeResults($this->request);
@@ -362,7 +376,8 @@ $results[] = $result;
 		$results = array();
 		try {
 			$results = $this->service->getProviderAccounts();
-			echo "\n".count($results)." Results Returned";
+			$count = (is_countable($results))? count($results) : 0;
+			echo "\n$count Results Returned";
 			
 			echo "\nProviders:";
 			var_dump($results);

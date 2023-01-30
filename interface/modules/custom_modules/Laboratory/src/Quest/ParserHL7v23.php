@@ -9,16 +9,14 @@
 
 namespace WMT\Laboratory\Quest;
 
-class ParseException extends Exception {
-	// just adds exception class name
-}
+use \Exception;
 
-class Segment_HL7v23 {
+class SegmentHL7v23 {
 	// contents are dynamic
 	var $type;
 }
 
-class Parser_HL7v23 {
+class ParserHL7v23 {
 
 	var $field_separator;
 	var $map;
@@ -37,7 +35,7 @@ class Parser_HL7v23 {
 	var $ZPS;
 	var $OTHER;
 
-	function Parser_HL7v23( $message, $_options = NULL ) {
+	function __construct( $message, $_options = NULL ) {
 		$this->message = $message;
 		$this->field_separator = '|'; // default
 		if (is_array($_options)) {
@@ -57,7 +55,7 @@ class Parser_HL7v23 {
 		
 		// Fail if there are no or one segments
 		if (count($segments) <= 1) {
-			throw new ParseException('\nNo segments found in HL7 message');
+			throw new Exception('\nNo segments found in HL7 message');
 		}
 
 		// Loop through messages
@@ -461,7 +459,7 @@ class Parser_HL7v23 {
 	
 	function getRequest() {
 		$map = &$this->map;
-		$message = new Segment_HL7v23();
+		$message = new SegmentHL7v23();
 	
 		// gather request information
 		$message->datetime = $this->MSH['message_datetime'];
@@ -506,7 +504,7 @@ class Parser_HL7v23 {
 			while ($item['type'] == 'NTE') {
 				$nte_data = &$this->NTE[$item['position']];
 				
-				$note = new Segment_HL7v23();
+				$note = new SegmentHL7v23();
 				$note->set_id = $nte_data['set_id'];
 				$note->source = $nte_data['source'];
 				$note->comment = $nte_data['comment'];
@@ -518,7 +516,7 @@ class Parser_HL7v23 {
 			while ($item['type'] == 'OBR') {
 				$obr_data = &$this->OBR[$item['position']];
 						
-				$report = new Segment_HL7v23();
+				$report = new SegmentHL7v23();
 				$report->set_id = $obr_data['set_id'];
 				$report->order_control = $this->ORC['order_control'];
 				$report->order_number = $obr_data['placer_order_number'];
@@ -565,7 +563,7 @@ class Parser_HL7v23 {
 						if ($message->labs[$lab_code]) { // already on file
 							$lab = $message->labs[$lab_code];
 						} else { // need to file
-							$lab = new Segment_HL7v23();
+							$lab = new SegmentHL7v23();
 				
 							$lab->code = $lab_code;
 							$lab->name = $lab_name;
@@ -584,7 +582,7 @@ class Parser_HL7v23 {
 				while ($item['type'] == 'NTE') {
 					$nte_data = &$this->NTE[$item['position']];
 				
-					$note = new Segment_HL7v23();
+					$note = new SegmentHL7v23();
 					$note->set_id = $nte_data['set_id'];
 					$note->source = $nte_data['source'];
 					$note->comment = $nte_data['comment'];
@@ -596,7 +594,7 @@ class Parser_HL7v23 {
 				while ($item['type'] == 'OBX') {
 					$obx_data = &$this->OBX[$item['position']];
 			
-					$result = new Segment_HL7v23();
+					$result = new SegmentHL7v23();
 					$result->set_id = $obx_data['set_id'];
 					$result->value_type = $obx_data['value_type'];
 					$result->observation_id = $obx_data['universal_service_id'];
@@ -615,7 +613,7 @@ class Parser_HL7v23 {
 					while ($item['type'] == 'NTE') {
 						$nte_data = &$this->NTE[$item['position']];
 				
-						$note = new Segment_HL7v23();
+						$note = new SegmentHL7v23();
 						$note->set_id = $nte_data['set_id'];
 						$note->source = $nte_data['source'];
 						$note->comment = $nte_data['comment'];
@@ -681,6 +679,6 @@ class Parser_HL7v23 {
 		return explode($this->field_separator, $segment);
 	} // end method __parse_segment
 	
-} // end class Parser_HL7v23
+} // end class ParserHL7v23
 
 ?>

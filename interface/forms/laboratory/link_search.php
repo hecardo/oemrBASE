@@ -1,51 +1,32 @@
 <?php
-/** *************************************************************************************
- *	LABORATORY/LINK_SEARCH.PHP
- *
- *	Copyright (c)2022 - Medical Technology Services
- *
- *	This program is licensed software: licensee is granted a limited nonexclusive
- *  license to install this Software on more than one computer system, as long as all
- *  systems are used to support a single licensee. Licensor is and remains the owner
- *  of all titles, rights, and interests in program.
- *  
- *  Licensee will not make copies of this Software or allow copies of this Software 
- *  to be made by others, unless authorized by the licensor. Licensee may make copies 
- *  of the Software for backup purposes only.
- *
- *	This program is distributed in the hope that it will be useful, but WITHOUT 
- *	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- *  FOR A PARTICULAR PURPOSE. LICENSOR IS NOT LIABLE TO LICENSEE FOR ANY DAMAGES, 
- *  INCLUDING COMPENSATORY, SPECIAL, INCIDENTAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL 
- *  DAMAGES, CONNECTED WITH OR RESULTING FROM THIS LICENSE AGREEMENT OR LICENSEE'S 
- *  USE OF THIS SOFTWARE.
- *
- *  @package laboratory
- *  @version 3.0
- *  @copyright Medical Technology Services
- *  @author Ron Criswell <ron@MDTechSvcs.com>
- *  @uses laboratory/common.php
- * 
- ************************************************************************************** */
+/**
+ * @package   	WMT
+ * @subpackage	Laboratory
+ * @author    	Ron Criswell <ron.criswell@medtechsvcs.com>
+ * @copyright 	Copyright (c)2023 Medical Technilogy Services
+ * @license   	https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
+ */
+
+use OpenEMR\Core\Header;
+use OpenEMR\Common\Logging\SystemLogger;
+
+use WMT\Classes\Tools;
+use WMT\Classes\Options;
+
+use WMT\Objects\User;
+use WMT\Objects\Patient;
+use WMT\Objects\Insurance;
+use WMT\Objects\Encounter;
+
+use WMT\Laboratory\Common\Processor;
+use WMT\Laboratory\Common\LabOrder;
+use WMT\Laboratory\Common\LabOrderItem;
+use WMT\Laboratory\Common\LabResult;
+use WMT\Laboratory\Common\LabResultItem;
+use WMT\Laboratory\Common\LabOrphan;
 
 // Global setup
 require_once("../../globals.php");
-require_once($GLOBALS['srcdir']."/mdts/mdts.globals.php");
-
-use OpenEMR\Core\Header;
-
-use function mdts\GetSeconds;
-use function mdts\FormatDate;
-use function mdts\FormatTime;
-use function mdts\LogError;
-use function mdts\LogException;
-
-use mdts\objects\User;
-use mdts\objects\Patient;
-use mdts\objects\LabOrphan;
-
-use mdts\classes\Options;
-
 
 // Grab session data
 $authid = $_SESSION['authId'];
@@ -53,10 +34,14 @@ $authuser = $_SESSION['authUser'];
 $groupname = $_SESSION['authProvider'];
 $authorized = $_SESSION['userauthorized'];
 
+// Establish log handler
+$logger = new SystemLogger();
+
 // Security violation
 if (!$authuser) {
-	mdts\LogError(E_ERROR, "Attempt to access program without authorization credentials.");
-	die ();
+	$msg = "Attempt to access program without authorization credentials.";
+	$logger->error($msg);
+	die($msg);
 }
 
 // Process initial ajax request
@@ -261,8 +246,9 @@ try { // catch any page processing errors
 	}
 }
 catch (Exception $e) { // fatal error processing page
-	wmt\LogException($e);
-	exit();
+	$msg = $e->getMessage();
+	$logger->error($msg);
+	die($msg);
 }
 ?>
 <!DOCTYPE html>

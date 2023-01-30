@@ -151,8 +151,9 @@ try {
 	$ins_list = Insurance::getPidInsDate($pid, $date_ordered);
 }
 catch (Exception $e) {
-	$logger->error($e->getMessage());
-	die($e->getMessage());
+	$msg = $e->getMessage();
+	$logger->error($msg);
+	die($msg);
 }
 
 
@@ -1653,12 +1654,12 @@ if ($order_data->status != 'i' && $order_data->status != 's' && $order_data->sta
 								<!-- LEFT SIDE -->
 								<div class="col-6 pl-2">
 									<div class="form-inline pb-1">
-										<div class="control-label pr-2 w-25">Results Received:</div>
+										<div class="control-label pr-2 w-30">Results Received:</div>
 										<input class="form-control form-control-sm w-auto" type='date' name='resulted_date' id='date_resulted' readonly
 												value='<?php echo Tools::FormatDate($order_data->received_datetime) ?>' />
 									</div>
 									<div class="form-inline pb-1">
-										<div class="control-label text-nowrap pr-2 w-25">Reviewed By:</div>
+										<div class="control-label text-nowrap pr-2 w-30">Reviewed By:</div>
 <?php if ($order_data->reviewed_id) {
 	$rrow = sqlQuery("SELECT * FROM `users` WHERE `id` = ?", array($order_data->reviewed_id));
 	$reviewer = ($rrow['lname'])? $rrow['lname'].', '.$rrow['fname'].' '.$rrow['mname'] : "Reviewer Missing!!";
@@ -1673,7 +1674,7 @@ if ($order_data->status != 'i' && $order_data->status != 's' && $order_data->sta
 <?php } ?>
 									</div>
 									<div class="form-inline pb-1">
-										<div class="control-label text-nowrap pr-2 w-25">Reviewed Date:</div>
+										<div class="control-label text-nowrap pr-2 w-30">Reviewed Date:</div>
 										<input class="form-control form-control-sm w-auto" type='date' name='reviewed_date' id='date_reviewed'
 											value='<?php echo Tools::FormatDate($order_data->reviewed_datetime) ?>' />
 									</div>
@@ -1685,7 +1686,7 @@ if ($order_data->status != 'i' && $order_data->status != 's' && $order_data->sta
 								<!-- RIGHT SIDE -->
 								<div class="col-6 pr-2">
 									<div class="form-inline pb-1">
-										<div class="control-label text-nowrap pr-2 w-25">Notified By:</div>
+										<div class="control-label text-nowrap pr-2 w-30">Notified By:</div>
 <?php if ($order_data->notified_id) {
 	$rrow= sqlQuery("SELECT * FROM users WHERE id = ?",array($order_data->notified_id));
 	$notifier = ($rrow['lname'])? $rrow['lname'].', '.$rrow['fname'].' '.$rrow['mname'] : "Notifier Missing!!";
@@ -1700,12 +1701,12 @@ if ($order_data->status != 'i' && $order_data->status != 's' && $order_data->sta
 <?php } ?>
 									</div>
 									<div class="form-inline pb-1">
-										<div class="control-label text-nowrap pr-2 w-25">Notification Date:</div>
+										<div class="control-label text-nowrap pr-2 w-30">Notification Date:</div>
 										<input class="form-control form-control-sm w-auto" type='date' name='notified_date' id='date_notified'
-											value='<?php Tools::FormatDate($order_data->notified_datetime) ?>' />
+											value='<?php echo Tools::FormatDate($order_data->notified_datetime) ?>' />
 									</div>
 									<div class="form-inline pb-1">
-										<div class="control-label text-nowrap pr-2 w-25">Person Contacted:</div>
+										<div class="control-label text-nowrap pr-2 w-30">Person Contacted:</div>
 										<input type='text' class="form-control form-control-sm" id='notified_person' name='notified_person'
 											value="<?php echo $order_data->notified_person ?>" />
 									</div>

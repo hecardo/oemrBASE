@@ -31,6 +31,7 @@ $pop = $_POST['pop'];
 
 $pid = $_POST['pid'];
 $lab_id = $_POST['lab_id'];
+$encounter = $_POST['encounter'];
 $provider_id = $_POST['provider_id'];
 
 $logger = new SystemLogger();
@@ -76,10 +77,10 @@ if ($mode == 'update') {
 	$order_data->portal_flag = $_POST['portal_flag'];
 	
 	if ($order_data->reviewed_id) {
-		$order_data->reviewed_datetime = FormatDateTime($_POST['reviewed_date']);
+		$order_data->reviewed_datetime = Tools::FormatDateTime($_POST['reviewed_date']);
 	}
 	if ($order_data->notified_id) {
-		$order_data->notified_datetime = FormatDateTime($_POST['notified_date']);
+		$order_data->notified_datetime = Tools::FormatDateTime($_POST['notified_date']);
 	}
 		
 	// lab notification required

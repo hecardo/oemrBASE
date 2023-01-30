@@ -45,7 +45,7 @@ if ($form_ignore) {
 	$key = $form_ignore;
 	
 	if ($key) {
-		sqlStatement("UPDATE `form_orphans` SET `pid` = 2 WHERE `id` = ?", array($key));
+		sqlStatement("UPDATE `form_orphans` SET `activity` = 0 WHERE `id` = ?", array($key));
 	}
 	$form_ignore = '';
 }
@@ -138,7 +138,7 @@ try { // catch any page processing errors
 		}
 		
 		// Global Search
-		$sWhere = "WHERE (fo.`pid` < '3' ";
+		$sWhere = "";
 		
 		if ( isset($_REQUEST['search']) && $_REQUEST['search']['value'] != "" ) {
 			foreach ( $sColumns AS $column ) {
@@ -190,7 +190,7 @@ try { // catch any page processing errors
 		}
 		if (!$form_active) {
 			$sWhere .= ( empty($sWhere) ) ? "WHERE ( " : "AND ";
-			$sWhere .= "fo.`pid` = '1' ";
+			$sWhere .= "fo.`activity` = '1' ";
 		}
 		
 		if ( isset($sWhere) ) $sWhere .= ") ";
@@ -204,7 +204,7 @@ try { // catch any page processing errors
 		
 		// Total records
 		$query = "SELECT COUNT(*) AS 'count' " . $sFrom . $sWhere;
-		$totals = reset( sqlQuery($query, $sBinds) );
+		$totals = sqlQuery($query, $sBinds);
 
 		// Build main query
 		$query = "

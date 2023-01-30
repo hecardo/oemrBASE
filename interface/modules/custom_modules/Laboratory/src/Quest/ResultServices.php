@@ -9,6 +9,8 @@
 
 namespace WMT\Laboratory\Quest;
 
+use \Exception;
+
 require_once 'SoapAuthClient.php';
 
 if (!class_exists("AcknowledgedResult")) {
@@ -211,15 +213,15 @@ class ObservationResultService extends SoapAuthClient {
 	 * @var array
 	 */
 	private static $classmap = array(
-		"AcknowledgedResult" => "AcknowledgedResult",
-		"Acknowledgment" => "Acknowledgment",
-		"ObservationResult" => "ObservationResult",
-		"ObservationResultDocument" => "ObservationResultDocument",
-		"ObservationResultRequest" => "ObservationResultRequest",
-		"ObservationResultResponse" => "ObservationResultResponse",
-		"ProviderAccount" => "ProviderAccount",
-		"ServiceException" => "ServiceException",
-		"SOAPException" => "SOAPException",
+		"AcknowledgedResult" => "WMT\Laboratory\Quest\AcknowledgedResult",
+		"Acknowledgment" => "WMT\Laboratory\Quest\Acknowledgment",
+		"ObservationResult" => "WMT\Laboratory\Quest\ObservationResult",
+		"ObservationResultDocument" => "WMT\Laboratory\Quest\ObservationResultDocument",
+		"ObservationResultRequest" => "WMT\Laboratory\Quest\ObservationResultRequest",
+		"ObservationResultResponse" => "WMT\Laboratory\Quest\ObservationResultResponse",
+		"ProviderAccount" => "WMT\Laboratory\Quest\ProviderAccount",
+		"ServiceException" => "WMT\Laboratory\Quest\ServiceException",
+		"SOAPException" => "WMT\Laboratory\Quest\SOAPException",
 	);
 
 	/**
@@ -270,7 +272,7 @@ class ObservationResultService extends SoapAuthClient {
 	 */
 	public function getResults($mixed = null) {
 		$validParameters = array(
-			"(ObservationResultRequest)",
+			"(WMT\Laboratory\Quest\ObservationResultRequest)",
 		);
 		$args = func_get_args();
 		$this->_checkArguments($args, $validParameters);
@@ -306,7 +308,7 @@ class ObservationResultService extends SoapAuthClient {
 	 */
 	public function acknowledgeResults($mixed = null) {
 		$validParameters = array(
-			"(Acknowledgment)",
+			"(WMT\Laboratory\Quest\Acknowledgment)",
 		);
 		$args = func_get_args();
 		$this->_checkArguments($args, $validParameters);
