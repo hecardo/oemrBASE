@@ -1,5 +1,5 @@
 <?php
-**
+/**
  * @package   WMT
  * @author    Ron Criswell <ron@medtechsvcs.com>
  * @copyright Copyright (c)2023 Medical Technilogy Services <https://medtechsvcs.com/>
@@ -7,7 +7,7 @@
  */
 
 /**
- * All new classes are defined in the MDTS namespace
+ * All new classes are defined in the WMT namespace
  */
 namespace WMT\Objects;
 
@@ -15,9 +15,8 @@ namespace WMT\Objects;
  *  Object definition for facility.
  *
  *  @name 		Facility
- *  @package	cda
  *  @copyright 	Medical Technology Services
- *  @author 	Ron Criswell <ron.criswell@MDTechSvcs.com>
+ *  @author 	Ron Criswell <ron.criswell@MedTechSvcs.com>
  *  @version 	1.0.0
  *
 */

@@ -1,25 +1,23 @@
 <?php
 /**
- * Bootstrap custom module for WMT Laboratory module.
+ * Bootstrap custom module for WMT Care Plan module.
  *
- * @package   wmt\laboratory
+ * @package   wmt\careplan
  * @author    Ron Criswell <ron@medtechsvcs.com>
  * @copyright Copyright (c) 2023 Medical Technology Services <https://medtechsvcs.com/>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-namespace WMT\Laboratory;
+namespace WMT\CarePlan;
 
 /**
  * @global OpenEMR\Core\ModulesClassLoader $classLoader
  */
 $library = $GLOBALS['srcdir'] . DIRECTORY_SEPARATOR . 'WMT';
-//$library = 'c:\Projects\oemrBASE\library\WMT';
 
 $classLoader->registerNamespaceIfNotExists('WMT\\Classes\\', $library . DIRECTORY_SEPARATOR . 'Classes');
 $classLoader->registerNamespaceIfNotExists('WMT\\Objects\\', $library . DIRECTORY_SEPARATOR . 'Objects');
-$classLoader->registerNamespaceIfNotExists('WMT\\Laboratory\\', __DIR__ . DIRECTORY_SEPARATOR . 'src');
-//$classLoader->registerNamespaceIfNotExists('WMT\\Laboratory\\Common\\', __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Common');
+$classLoader->registerNamespaceIfNotExists('WMT\\CarePlan\\', __DIR__ . DIRECTORY_SEPARATOR . 'src');
 
 /**
  * @global EventDispatcher $eventDispatcher Injected by the OpenEMR module loader;
