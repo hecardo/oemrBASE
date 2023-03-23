@@ -272,7 +272,7 @@ class Bootstrap
 		$subItem->on_click = '';
 		$subItem->requirement = 0;
 		$subItem->target = 'main';
-		$subItem->url = self::PLAN_PROGRAM_PATH . 'Forms/Planning.php?pid=';
+		$subItem->url = self::PLAN_PROGRAM_PATH . 'Planning/list_plans.php?pid=';
 
 		return $subItem;
 	}

@@ -240,7 +240,7 @@ EOD;
 			while ($aoe = sqlFetchArray($result)) {
 				$question = str_replace(':','',$aoe['question_text']);
 				if ($question && $aoe['answer']) {
-					$aoe_out .= "<tr><td class='wmtLabel' style='width:200px;white-space:nowrap'>".$question.": </td>\n";
+					$aoe_out .= "<tr><td class='wmtLabel' style='width:200px;white-space:nowrap;text-align:right;'>".$question.": </td>\n";
 					$aoe_out .= "<td class='wmtOutput' style='white-space:nowrap'>".$aoe['answer']."</td></tr>\n";
 					$need_blank = true;
 				}

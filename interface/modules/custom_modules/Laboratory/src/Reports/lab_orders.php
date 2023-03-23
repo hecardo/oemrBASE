@@ -281,7 +281,7 @@ try { // catch any page processing errors
 		// Create output
 		$output = array(
 			"draw" => $draw,
-			"recordsTotal" => $totals['count'],
+						"recordsTotal" => $totals ? $totals['count'] : 0,
 			"recordsFiltered" => $filtered,
 			"data" => $limited
 		);

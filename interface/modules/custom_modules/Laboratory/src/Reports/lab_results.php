@@ -218,7 +218,7 @@ try { // catch any page processing errors
 		// Total records
 		$query = "SELECT COUNT(*) AS 'count' " . $sFrom . $sWhere;
 		$tmp_res = sqlQuery($query, $sBinds);
-		$totals = reset($tmp_res);
+		$totals = $tmp_res;
 
 		// Build main query
 		$query = "

@@ -241,7 +241,8 @@ if ($type == 'label') {
 		$pdf->WriteText(2, 4, 'Client #:' . $account);
 		$pdf->WriteText(2, 7, 'Order #:' . $order);
 		$pdf->WriteText(2, 10, $patient);
-		$pdf->WriteBarcode2($account.'-'.$order, 2, 11, 0.6, 1, false, false, 'c39', '');
+		// Mpdf\Mpdf::WriteBarcode2($code, $x='', $y='', $size=1, $height=1, $bgcol=false, $col=false, $btype='IMB', $print_ratio='', $k=1, $quiet_zone_left=null, $quiet_zone_right=null) : mixed 
+		$pdf->WriteBarcode2($account.'-'.$order, 2, 11, 0.52, 1, false, false, 'c39', '');
 	} while ($count-- > 1);
 
 	

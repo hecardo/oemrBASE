@@ -231,7 +231,7 @@ if (is_array($test_code) && count($test_code) > 0) {
 		$code_key = "aoe".$code."_code";
 		$label_key = "aoe".$code."_label";
 		$text_key = "aoe".$code."_text";
-		$code_count = (isset($_POST[$code_key]))? count($_POST($code_key)) : 0;
+		$code_count = (isset($_POST[$code_key]))? count($_POST[$code_key]) : 0;
 		for ($a = 0; $a < $code_count; $a++) {
 			$key = "aoe".$a."_code";
 			$qcode = $_POST[$code_key][$a];

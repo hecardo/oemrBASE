@@ -168,6 +168,28 @@ class Patient {
 	}
 	
 	/**
+	 * Retrieve patient full name.
+	 *
+	 * @method		getFullName
+	 * @param		string	$pid - patient identifier
+	 * @return		string	$name - patient name
+	 * @static
+	 *
+	 */
+	public static function getFullName($pid) {
+		$name = '';
+
+		$query = "SELECT `fname`, `mname`, `lname`, `suffix` FROM `patient_data` WHERE `pid` = ?";
+		$patient = sqlQuery($query, array($pid));
+		$name = $patient['fname'].' ';
+		if ($patient['mname']) $name .= $patient['mname'].' ';
+		$name .= $patient['lname'];
+		if ($patient['suffix']) $name .= ' '.$patient['suffix'];
+		
+		return $name;
+	}
+	
+	/**
 	 * Create or retrieve a new patient object by external identifier.
 	 * 
 	 * @method		getExternal

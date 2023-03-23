@@ -15,9 +15,8 @@ use OpenEMR\Common\Csrf\CsrfUtils;
 use OpenEMR\Core\Header;
 use OpenEMR\Menu\PatientMenuRole;
 use OpenEMR\OeUI\OemrUI;
-use OpenEMR\Common\Logging\SystemLogger;
 
-use WMT\Classes\Options;
+use WMT\Objects\CarePlan;
 
 $settings = array(
 	'heading_title' => xl('Patient Care Plan'),
@@ -75,7 +74,7 @@ $oemr_ui = new OemrUI($settings);
 		<div class="row mt-3">
 			<div class="col-sm-12">
 				<div class="btn-group">
-					<a href="add_plan.php" class="btn btn-primary btn-add" onclick="top.restoreSession()">
+					<a href="edit_plan.php" class="btn btn-primary btn-add" onclick="top.restoreSession()">
 						<?php echo xlt('Create New Plan'); ?></a>
 				</div>
 			</div>
@@ -84,8 +83,7 @@ $oemr_ui = new OemrUI($settings);
 		<div>
 			<div class="col-sm-12 text jumbotron py-4">
 				<?php
-				//if ($result = getTransByPid($pid)) {
-				if (true) {
+				if ($plans = CarePlan::getPlansByPid($pid)) {
 				?>
 					<div class="table-responsive">
 						<table class="table table-hover">
@@ -160,7 +158,7 @@ $oemr_ui = new OemrUI($settings);
 				} else {
 					?>
 				<span class="text">
-					<i class="fa fa-exclamation-circle oe-text-orange" aria-hidden="true"></i> <?php echo xlt('There are no transactions on file for this patient.'); ?>
+					<i class="fa fa-exclamation-circle oe-text-orange" aria-hidden="true"></i> <?php echo xlt('There is no Care Plan on file for this patient.'); ?>
 				</span>
 					<?php } ?>
 			</div>
