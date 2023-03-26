@@ -52,6 +52,8 @@ class QuestClient {
 	private $request = null;
 	private $response = null;
 	private $documents = array();
+	
+	private $pat_data;
 
 	private $DEBUG = false;
 		
@@ -126,23 +128,23 @@ class QuestClient {
 		$this->request->hl7Order = '';
 		
 		// retrieve additional data records
-		$patient_data = Patient::getPidPatient($order_data->pid);
+		$this->pat_data = Patient::getPidPatient($order_data->pid);
 			
-		$pname = $patient_data->lname;
-		$pname .= "^".$patient_data->fname;
-		$pname .= "^".$patient_data->mname;
+		$pname = $this->pat_data->lname;
+		$pname .= "^".$this->pat_data->fname;
+		$pname .= "^".$this->pat_data->mname;
 			
-		$paddress = $patient_data->street;
-		$paddress .= "^".$patient_data->street2;
-		$paddress .= "^".$patient_data->city;
-		$paddress .= "^".$patient_data->state;
-		$paddress .= "^".$patient_data->postal_code;
+		$paddress = $this->pat_data->street;
+		$paddress .= "^".$this->pat_data->street2;
+		$paddress .= "^".$this->pat_data->city;
+		$paddress .= "^".$this->pat_data->state;
+		$paddress .= "^".$this->pat_data->postal_code;
 			
 		$dob = '';
-		if (strtotime($patient_data->DOB))
-			$dob = date('Ymd',strtotime($patient_data->DOB));
+		if (strtotime($this->pat_data->DOB))
+			$dob = date('Ymd',strtotime($this->pat_data->DOB));
 			
-		$sex = substr(strtoupper($patient_data->sex),0,1);
+		$sex = substr(strtoupper($this->pat_data->sex),0,1);
 		if (!$sex) $sex = 'U';
 	
 		if (strtotime($order_data->date_transmitted))
@@ -165,8 +167,10 @@ class QuestClient {
 		if ($this->DEBUG) error_log("HL7: " . $this->request->hl7Order); // DEBUG
 			
 		// patient segment
-		$PID = "PID|1||$patient_data->pubpid|$patient_data->pid|$pname||$dob|$sex||$patient_data->race|$paddress||$patient_data->phone_home|||||$order_data->request_account^^^$order_data->request_billing^$order_data->abn_signed|$patient_data->ss||||$patient_data->ethnicity|\r";
-		$this->request->hl7Order .= $PID;
+		$email = '';
+		if ($this->pat_data->hipaa_allowemail == 'YES') $email = $this->pat_data->email;
+		$PID = "PID|1||%s|%s|$pname||$dob|$sex||%s|$paddress||%s^^^$email|||||$order_data->request_account^^^$order_data->request_billing^$order_data->abn_signed|%s||||%s|\r";
+		$this->request->hl7Order .= sprintf($PID, $this->pat_data->pubpid, $this->pat_data->pid, $this->pat_data->race, $this->pat_data->phone_home, $this->pat_data->ss, $this->pat_data->ethnicity);
 		if ($this->DEBUG) error_log("PID: " . $PID);  // DEBUG
 			
 		// clinic notes (add to the end)
@@ -381,8 +385,8 @@ class QuestClient {
 			list($code,$dx_text) = explode("^",$diag);
 			if (!$code) continue;
 	
-			if (strpos($code, ":") === false) { // type not provided (assume ICD9)
-				$dx_type = "I9";
+			if (strpos($code, ":") === false) { // type not provided (assume ICD10)
+				$dx_type = "I10";
 				$dx_code = $code;
 			}
 			else {
@@ -408,7 +412,46 @@ class QuestClient {
 				}
 			}
 		}
-			
+		
+		// identity & orientation (Quest required 3/23/2023)
+		$orientation = 'D'; // default undisclosed
+		$title = 'Choose not to disclose';
+		$record = sqlQuery("SELECT * FROM `list_options` WHERE `list_id` LIKE 'sexual_orientation' AND `option_id` LIKE ?", array($this->pat_data->sexual_orientation));
+		if (isset($record['notes'])) {
+			$title = $record['title'];
+			$values = explode(';', $record['notes']);
+			foreach ($values as $value) {
+				if (strpos($value, 'QUEST:') === FALSE) continue;
+				$orientation = str_replace('QUEST:', '', $value);
+				if (!in_array($orientation, ['D','BI','HOM','HET','SE','DK'])) {
+					$orientation = 'D';
+					$title = 'Choose not to disclose';
+				}
+			}
+		}
+		$OBX = "OBX|".$aoeid++."|CWE|76690-7^Sexual Orientation^LN|1|$orientation^$title^L||||||F|||$odate|||||||||||||||QST\r";
+		$this->request->hl7Order .= $OBX;
+		if ($this->DEBUG) echo $OBX . "\n";  // DEBUG
+		
+		$identity = 'D'; // undisclosed
+		$title = 'Choose not to disclose';
+		$record = sqlQuery("SELECT * FROM `list_options` WHERE `list_id` LIKE 'gender_identity' AND `option_id` LIKE ?", array($this->pat_data->gender_identity));
+		if (isset($record['notes'])) {
+			$title = $record['title'];
+			$values = explode(';', $record['notes']);
+			foreach ($values as $value) {
+				if (strpos($value, 'QUEST:') === FALSE) continue;
+				$identity = str_replace('QUEST:', '', $value);
+				if (!in_array($identity, ['D','F','X','M','FTM','MTF','TNOS'])) {
+					$identity = 'D';
+					$title = 'Choose not to disclose';
+				}
+			}
+		}
+		$OBX = "OBX|".$aoeid++."|CWE|76691-5^Gender Identity^LN|1|$identity^$title^L||||||F|||$odate|||||||||||||||QST\r";
+		$this->request->hl7Order .= $OBX;
+		if ($this->DEBUG) echo $OBX . "\n";  // DEBUG
+		
 	}
 
 
