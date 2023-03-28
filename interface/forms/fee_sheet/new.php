@@ -208,7 +208,7 @@ function echoServiceLines()
         } else { // not billed
             if ($institutional) {
                 if ($codetype != 'COPAY' && $codetype != 'ICD10') {
-                    echo "  <td class='billcell'><select type='text' class='revcode form-control form-control-sm' name='bill[" . attr($lino) . "][revenue_code]' " .
+                    echo "  <td class='billcell'><select type='text' class='revcode form-control' name='bill[" . attr($lino) . "][revenue_code]' " .
                         "title='" . xla("Revenue Code for this item. Type to search") . "' " .
                         "value='" . attr($revenue_code) . "' size='4'></select></td>\n";
                 } else {
