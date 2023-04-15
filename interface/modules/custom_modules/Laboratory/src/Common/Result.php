@@ -23,7 +23,6 @@ class Result {
 	
 	/**
 	 * @param int $id record identifier
-	 * @param boolean $update - DEPRECATED
 	 * @return object instance of result class
 	 */
 	public function __construct($id = false) {
@@ -47,7 +46,7 @@ class Result {
 	 * Inserts data from a form object into the database.
 	 *
 	 * @static
-	 * @param wmtOrder $object
+	 * @param LabOrder $object
 	 * @return int $id identifier for new object
 	 */
 	public static function insert(Result $object) {

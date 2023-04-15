@@ -83,6 +83,7 @@ if (!empty($lab_id)) {
 				$reporter = new Labcorp\ResultReport();
 				break;
 			case 'G':
+			case 'F':
 				$client = new Generic\ResultClient($lab_id);
 				$messages = $client->getResults(25, $debug);
 				$reporter = new Generic\ResultReport();
